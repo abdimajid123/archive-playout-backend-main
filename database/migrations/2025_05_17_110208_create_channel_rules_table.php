@@ -5,11 +5,13 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('channel_rules', function (Blueprint $table) {
             $table->id();
-            $table->string('channel')->unique(); // one rule per channel
+            $table->string('channel')->unique();
             $table->integer('min_content_per_day')->default(1);
             $table->integer('max_content_per_day');
             $table->integer('slot_duration_minutes')->default(30);

@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    // Disable transaction to reveal the first failing statement on PostgreSQL
+    public $withinTransaction = false;
+
     /**
      * Run the migrations.
      */

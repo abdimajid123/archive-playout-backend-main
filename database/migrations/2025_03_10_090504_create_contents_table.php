@@ -5,6 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    public $withinTransaction = false;
+
     public function up()
 {
     Schema::create('contents', function (Blueprint $table) {
@@ -16,7 +18,7 @@ return new class extends Migration {
         $table->integer('episode')->nullable();
         $table->string('type');
         $table->json('category'); // ✅ convert to JSON
-        $table->year('year')->nullable();
+        $table->integer('year')->nullable();
         $table->time('duration')->nullable(); // ✅ video length
         $table->string('country')->nullable();
         $table->timestamps();

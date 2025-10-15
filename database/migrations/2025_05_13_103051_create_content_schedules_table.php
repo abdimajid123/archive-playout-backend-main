@@ -6,26 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public $withinTransaction = false;
+
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-                Schema::create('content_schedules', function (Blueprint $table) {
+        Schema::create('content_schedules', function (Blueprint $table) {
             $table->id();
-                
-            $table->unsignedBigInteger('content_id');
-            $table->unsignedBigInteger('slot_id');
-                
-            $table->string('channel'); // For redundancy and filtering
-            $table->date('date'); // Same as schedule_slots.date
-            $table->time('start_time'); // Actual schedule start time
-            $table->time('end_time');   // Calculated based on content duration
-                
+
+            $table->foreignId('content_id')->constrained('contents')->cascadeOnDelete();
+            $table->foreignId('slot_id')->constrained('schedule_slots')->cascadeOnDelete();
+
+            $table->string('channel');
+            $table->date('date');
+            $table->time('start_time');
+            $table->time('end_time');
+
             $table->timestamps();
-                
-            $table->foreign('content_id')->references('id')->on('contents')->onDelete('cascade');
-            $table->foreign('slot_id')->references('id')->on('schedule_slots')->onDelete('cascade');
         });
     }
 
