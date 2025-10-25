@@ -23,7 +23,7 @@ class AuthController extends Controller
     $request->validated($request->all());
 
     if (!\Illuminate\Support\Facades\Auth::attempt($request->only('email', 'password'))) {
-        return $this->error('', 'Credentails do not match', 401);
+        return $this->error('', 401, 'Credentails do not match');
     }
 
     $user = \App\Models\User::where('email', $request->email)->first();
@@ -78,14 +78,14 @@ class AuthController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             // Handle database errors (like duplicate email)
             if ($e->getCode() == 23000) { // MySQL duplicate entry error
-                return $this->error('', 'Email already exists', 422);
+                return $this->error('', 422, 'Email already exists');
             }
             Log::error('Registration database error: ' . $e->getMessage());
-            return $this->error('', 'Registration failed. Please try again.', 500);
+            return $this->error('', 500, 'Registration failed. Please try again.');
             
         } catch (\Exception $e) {
             Log::error('Registration error: ' . $e->getMessage());
-            return $this->error('', 'Registration failed. Please try again.', 500);
+            return $this->error('', 500, 'Registration failed. Please try again.');
         }
     }
 
@@ -134,7 +134,7 @@ class AuthController extends Controller
 {
     // Check if the authenticated user is an admin
     if (Auth::user()->role !== 'admin') {
-        return $this->error('', 'Unauthorized: Only admins can change roles.', 403);
+        return $this->error('', 403, 'Unauthorized: Only admins can change roles.');
     }
 
     // Validate the request
@@ -145,7 +145,7 @@ class AuthController extends Controller
     // Find the user
     $user = User::find($id);
     if (!$user) {
-        return $this->error('', 'User not found', 404);
+        return $this->error('', 404, 'User not found');
     }
 
     // Update the role
@@ -164,13 +164,13 @@ public function deleteUser($id)
 {
     // Check if the authenticated user is an admin
     if (Auth::user()->role !== 'admin') {
-        return $this->error('', 'Unauthorized: Only admins can delete users.', 403);
+        return $this->error('', 403, 'Unauthorized: Only admins can delete users.');
     }
 
     // Find the user
     $user = User::find($id);
     if (!$user) {
-        return $this->error('', 'User not found', 404);
+        return $this->error('', 404, 'User not found');
     }
 
     // Delete the user

@@ -15,7 +15,7 @@ class EmailVerificationController extends Controller
     public function sendVerificationEmail(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return $this->error('', 'Email already verified', 400);
+            return $this->error('', 400, 'Email already verified');
         }
 
         $request->user()->sendEmailVerificationNotification();
@@ -30,11 +30,11 @@ class EmailVerificationController extends Controller
         $user = User::find($id);
         
         if (!$user) {
-            return $this->error('', 'User not found', 404);
+            return $this->error('', 404, 'User not found');
         }
 
         if ($user->hasVerifiedEmail()) {
-            return $this->error('', 'Email already verified', 400);
+            return $this->error('', 400, 'Email already verified');
         }
 
         if ($user->markEmailAsVerified()) {
@@ -45,6 +45,6 @@ class EmailVerificationController extends Controller
             ]);
         }
 
-        return $this->error('', 'Invalid verification link', 400);
+        return $this->error('', 400, 'Invalid verification link');
     }
 } 
