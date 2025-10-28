@@ -29,12 +29,16 @@ WORKDIR /var/www
 COPY . .
 
 # Install dependencies (no dev), optimized and non-interactive
+ENV COMPOSER_MEMORY_LIMIT=-1
+
 RUN composer install \
     --no-dev \
+    --no-scripts \
     --prefer-dist \
     --no-interaction \
     --no-progress \
-    --optimize-autoloader
+    --optimize-autoloader \
+    -vvv
 
 # Copy NGINX config and startup script
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
