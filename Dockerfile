@@ -2,7 +2,6 @@ FROM php:8.2-fpm
 
 # Install system packages
 RUN apt-get update && apt-get install -y \
-    nginx \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
@@ -21,6 +20,7 @@ COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 # Allow composer to run as root in container builds
 ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
 
 # Set working directory
 WORKDIR /var/www
@@ -29,24 +29,17 @@ WORKDIR /var/www
 COPY . .
 
 # Install dependencies (no dev), optimized and non-interactive
-ENV COMPOSER_MEMORY_LIMIT=-1
-
 RUN composer install \
     --no-dev \
-    --no-scripts \
     --prefer-dist \
     --no-interaction \
-    --no-progress \
-    --optimize-autoloader \
-    -vvv
+    --optimize-autoloader
 
-# Copy NGINX config and startup script
-COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Set permissions
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Expose Cloud Run port
-EXPOSE 8080
+# Expose port
+EXPOSE 8000
 
-# Start both PHP and NGINX
-CMD ["entrypoint.sh"]
+# Start PHP server
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
