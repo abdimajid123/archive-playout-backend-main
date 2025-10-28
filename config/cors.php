@@ -21,17 +21,10 @@ return [
 
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:3000'),
-        $frontendUrl = config('app.frontend_url', 'http://localhost:3000'),
-
-        'https://archive-playout-frontend.pages.dev',
-        'https://archive-playout-362374170433.us-central1.run.app',
         'http://localhost:3000',
-        'https://localhost:3000',
         'http://localhost:8000',
         'http://127.0.0.1:3000',
-        'https://127.0.0.1:3000',
-        'http://archive-playout-backend.test',
-        'https://archive-playout-backend.test'
+        'http://127.0.0.1:8000',
     ],
 
     'allowed_origins_patterns' => [],
