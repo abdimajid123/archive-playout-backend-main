@@ -44,5 +44,5 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 # Expose port
 EXPOSE 8080
 
-# Start PHP built-in server
-CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
+# Run migrations on boot (free tier workaround), then start server on Render's $PORT
+CMD ["bash", "-lc", "php artisan migrate --force && php -S 0.0.0.0:$PORT -t public"]
