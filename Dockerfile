@@ -1,4 +1,5 @@
-FROM php:8.3-fpm
+# Use official PHP image with CLI and extensions
+FROM php:8.3-cli
 
 # Install required PHP extensions and system packages
 RUN apt-get update && apt-get install -y \
@@ -28,21 +29,19 @@ WORKDIR /var/www
 # Copy app files
 COPY . .
 
-# Install dependencies
+# Install dependencies (production optimized)
 RUN composer install \
     --no-dev \
     --prefer-dist \
     --no-interaction \
     --no-progress \
-    --optimize-autoloader \
-    -vvv
+    --optimize-autoloader
 
-
-# Set permissions
+# Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Expose port
+# Expose port 8080 for Cloud Run
 EXPOSE 8080
 
-# Run migrations on boot (free tier workaround), then start server on Render's $PORT
-CMD ["bash", "-lc", "php artisan migrate --force && php -S 0.0.0.0:$PORT -t public"]
+# Run migrations on startup, then start Laravel on the Cloud Run port
+CMD php artisan migrate --force && php -S 0.0.0.0:${PORT:-8080} -t public
