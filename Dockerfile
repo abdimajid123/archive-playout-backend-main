@@ -14,7 +14,9 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip exif pcntl bcmath gd
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip exif pcntl bcmath gd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
@@ -26,8 +28,8 @@ ENV COMPOSER_MEMORY_LIMIT=-1
 # Set working directory
 WORKDIR /var/www
 
-# Copy app files
-COPY . .
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
 
 # Install dependencies (production optimized)
 RUN composer install \
@@ -35,13 +37,28 @@ RUN composer install \
     --prefer-dist \
     --no-interaction \
     --no-progress \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --no-scripts
+
+# Copy app files
+COPY . .
+
+# Run composer scripts
+RUN composer dump-autoload --optimize
 
 # Set permissions for Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Expose port 8080 for Cloud Run
 EXPOSE 8080
 
-# Run migrations on startup, then start Laravel on the Cloud Run port
-CMD php artisan migrate --force && php -S 0.0.0.0:${PORT:-8080} -t public
+# Create startup script
+RUN echo '#!/bin/sh\n\
+PORT=${PORT:-8080}\n\
+echo "Starting server on port $PORT"\n\
+exec php -S 0.0.0.0:$PORT -t public\n\
+' > /start.sh && chmod +x /start.sh
+
+# Use the startup script
+CMD ["/start.sh"]
