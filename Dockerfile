@@ -46,6 +46,12 @@ COPY . .
 # Run composer scripts
 RUN composer dump-autoload --optimize
 
+# Clear Laravel caches to ensure DB_HOST and DB_CONNECTION are applied
+RUN php artisan config:clear \
+    && php artisan cache:clear \
+    && php artisan route:clear \
+    && php artisan view:clear
+
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
